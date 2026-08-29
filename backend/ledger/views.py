@@ -12,6 +12,7 @@ from django.db.models import Q
 from .models import Transaction
 from .serializers import TransactionSerializer, CreateSendSerializer, CreateRequestSerializer
 from .services import execute_transfer
+from .fraud import run_fraud_check
 
 User = get_user_model()
 
@@ -53,6 +54,7 @@ class SendMoneyView(BaseLedgerView):
                 
                 tx.status = 'completed'
                 tx.resolved_at = timezone.now()
+                run_fraud_check(tx, payer=request.user)
                 tx.save()
 
         except IntegrityError:
@@ -121,6 +123,7 @@ class ApproveRequestView(BaseLedgerView):
                 execute_transfer(payer_id=tx.counterparty.id, payee_id=tx.initiator.id, amount=tx.amount)
                 tx.status = 'completed'
                 tx.resolved_at = timezone.now()
+                run_fraud_check(tx, payer=tx.counterparty)
                 tx.save()
         except ValidationError as e:
             return Response({"error": str(e.message if hasattr(e, 'message') else e)}, status=status.HTTP_400_BAD_REQUEST)

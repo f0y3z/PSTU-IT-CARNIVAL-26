@@ -79,6 +79,10 @@ export default function TransactionDetail() {
         </h1>
         <span className={`status-pill status-${tx.status}`}>{statusLabel(tx.status)}</span>
 
+        {tx.risk_flagged && (
+          <div className="risk-banner">⚠ {tx.risk_reason || 'This transaction was flagged as unusual.'}</div>
+        )}
+
         <div className="detail-grid">
           <div className="detail-item">
             <div className="label">Counterparty</div>
