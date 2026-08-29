@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import History from './pages/History';
 import PendingRequests from './pages/PendingRequests';
 import TransactionDetail from './pages/TransactionDetail';
+import { USING_MOCK } from './api';
 
 function Layout({ children }) {
   return (
@@ -25,6 +26,20 @@ export default function App() {
     <AuthProvider>
       <ToastProvider>
         <BrowserRouter>
+          {USING_MOCK && (
+            <div
+              style={{
+                background: '#1B2430',
+                color: '#F6F4EF',
+                fontSize: 12,
+                textAlign: 'center',
+                padding: '6px 12px',
+                fontFamily: 'IBM Plex Mono, monospace',
+              }}
+            >
+              Mock API active — demo users: alice / bob (password: password123). Set REACT_APP_USE_MOCK=false to use the real backend.
+            </div>
+          )}
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

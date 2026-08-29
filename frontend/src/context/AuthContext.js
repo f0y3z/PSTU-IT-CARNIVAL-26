@@ -15,6 +15,7 @@ export function AuthProvider({ children }) {
     }
     try {
       const me = await api.me();
+      localStorage.setItem('mm_username', me.username);
       setUser(me);
     } catch (e) {
       // token invalid/expired
@@ -52,6 +53,7 @@ export function AuthProvider({ children }) {
       // ignore — log out locally regardless
     }
     localStorage.removeItem('mm_token');
+    localStorage.removeItem('mm_username');
     setToken(null);
     setUser(null);
   };
