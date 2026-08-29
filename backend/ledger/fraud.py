@@ -56,4 +56,5 @@ def run_fraud_check(transaction, payer):
 
     transaction.risk_flagged = result["risk_flagged"]
     transaction.risk_reason = result["risk_reason"]
-    # no .save() here -- the calling view saves tx right after this runs
+    transaction.risk_score = result["risk_score"]
+    return result

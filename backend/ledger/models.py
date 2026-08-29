@@ -28,6 +28,14 @@ class Transaction(models.Model):
     
     risk_flagged = models.BooleanField(default=False)
     risk_reason = models.TextField(blank=True, null=True)
+    RISK_STATUS_CHOICES = (
+        ('pending', 'Pending review'),
+        ('clear', 'Clear'),
+        ('flagged', 'Flagged'),
+    )
+    risk_status = models.CharField(max_length=10, choices=RISK_STATUS_CHOICES, default='clear')
+    risk_score = models.FloatField(blank=True, null=True)
+    risk_checked_at = models.DateTimeField(blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     resolved_at = models.DateTimeField(blank=True, null=True)

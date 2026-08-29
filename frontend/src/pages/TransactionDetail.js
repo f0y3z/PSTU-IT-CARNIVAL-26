@@ -82,6 +82,9 @@ export default function TransactionDetail() {
         {tx.risk_flagged && (
           <div className="risk-banner">⚠ {tx.risk_reason || 'This transaction was flagged as unusual.'}</div>
         )}
+        {tx.risk_status === 'pending' && tx.status === 'completed' && (
+          <div className="review-banner">Fraud review is running in the background. Refresh this page shortly.</div>
+        )}
 
         <div className="detail-grid">
           <div className="detail-item">

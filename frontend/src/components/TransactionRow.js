@@ -30,6 +30,9 @@ export default function TransactionRow({ tx }) {
           {isOut ? '−' : '+'}${formatMoney(tx.amount)}
         </div>
         <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', marginTop: 2 }}>
+          {tx.risk_status === 'pending' && tx.status === 'completed' && (
+            <span className="review-badge">Reviewing</span>
+          )}
           {tx.risk_flagged && <span className="risk-badge" title={tx.risk_reason}>⚠ Flagged</span>}
           <span className={`status-pill status-${tx.status}`}>{statusLabel(tx.status)}</span>
         </div>

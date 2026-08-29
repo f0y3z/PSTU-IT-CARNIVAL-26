@@ -12,7 +12,7 @@ from django.db.models import Q
 from .models import Transaction
 from .serializers import TransactionSerializer, CreateSendSerializer, CreateRequestSerializer
 from .services import execute_transfer
-from .fraud import run_fraud_check
+from .tasks import check_fraud_transaction
 
 User = get_user_model()
 
@@ -47,15 +47,16 @@ class SendMoneyView(BaseLedgerView):
                     counterparty=recipient,
                     amount=data['amount'],
                     note=data.get('note', ''),
-                    idempotency_key=data['idempotency_key']
+                    idempotency_key=data['idempotency_key'],
+                    risk_status='pending',
                 )
                 
                 execute_transfer(request.user.id, recipient.id, data['amount'])
                 
                 tx.status = 'completed'
                 tx.resolved_at = timezone.now()
-                run_fraud_check(tx, payer=request.user)
                 tx.save()
+                transaction.on_commit(lambda transaction_id=str(tx.id): check_fraud_transaction.delay(transaction_id))
 
         except IntegrityError:
             tx = Transaction.objects.get(idempotency_key=data['idempotency_key'])
@@ -123,8 +124,9 @@ class ApproveRequestView(BaseLedgerView):
                 execute_transfer(payer_id=tx.counterparty.id, payee_id=tx.initiator.id, amount=tx.amount)
                 tx.status = 'completed'
                 tx.resolved_at = timezone.now()
-                run_fraud_check(tx, payer=tx.counterparty)
-                tx.save()
+                tx.risk_status = 'pending'
+                tx.save(update_fields=['status', 'resolved_at', 'risk_status'])
+                transaction.on_commit(lambda transaction_id=str(tx.id): check_fraud_transaction.delay(transaction_id))
         except ValidationError as e:
             return Response({"error": str(e.message if hasattr(e, 'message') else e)}, status=status.HTTP_400_BAD_REQUEST)
 
