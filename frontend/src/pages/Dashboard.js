@@ -11,6 +11,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [recent, setRecent] = useState([]);
+  const [suspicious, setSuspicious] = useState([]);
   const [loading, setLoading] = useState(true);
   const [incomingCount, setIncomingCount] = useState(0);
   const [modal, setModal] = useState(null); // 'send' | 'request' | null
@@ -21,10 +22,11 @@ export default function Dashboard() {
     setLoading(true);
     try {
       const [historyRes, incoming] = await Promise.all([
-        api.history({ page: 1 }),
+        api.history({ page: 1, pageSize: 100 }),
         api.pendingIncoming(),
       ]);
       setRecent(historyRes.results.slice(0, 5));
+      setSuspicious(historyRes.results.filter((tx) => tx.risk_flagged));
       setIncomingCount(incoming.length);
     } finally {
       setLoading(false);
@@ -51,6 +53,19 @@ export default function Dashboard() {
             Dismiss
           </button>
         </div>
+      )}
+
+      {suspicious.length > 0 && (
+        <Link to="/history" className="security-alert" aria-label="View suspicious activity in transaction history">
+          <span className="security-alert-icon" aria-hidden="true">⚠</span>
+          <span>
+            <strong>Suspicious activity detected</strong>
+            <span className="security-alert-copy">
+              {suspicious.length} transaction{suspicious.length === 1 ? '' : 's'} need{suspicious.length === 1 ? 's' : ''} review.
+            </span>
+          </span>
+          <span className="security-alert-action">Review activity →</span>
+        </Link>
       )}
 
       <div className="card balance-hero">

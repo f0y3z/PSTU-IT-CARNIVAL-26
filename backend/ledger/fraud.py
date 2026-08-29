@@ -6,7 +6,9 @@ the payer's recent history, then stores the result on the Transaction row.
 
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Q
 from fraud_ml.predict_fraud import check_transaction
+from .models import Transaction
 
 
 def run_fraud_check(transaction, payer):
@@ -20,9 +22,11 @@ def run_fraud_check(transaction, payer):
                        - in ApproveRequestView: tx.counterparty
     """
     five_min_ago = timezone.now() - timedelta(minutes=5)
+    payer_transactions = Transaction.objects.filter(
+        Q(type="send", initiator=payer) | Q(type="request", counterparty=payer)
+    )
     recent_count = (
-        payer.initiated_transactions
-        .filter(created_at__gte=five_min_ago)
+        payer_transactions.filter(created_at__gte=five_min_ago)
         .exclude(id=transaction.id)
         .count()
     )
@@ -36,7 +40,7 @@ def run_fraud_check(transaction, payer):
     )
 
     past_amounts = list(
-        payer.initiated_transactions.filter(status="completed")
+        payer_transactions.filter(status="completed")
         .exclude(id=transaction.id)
         .values_list("amount", flat=True)
     )

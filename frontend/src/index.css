@@ -263,6 +263,29 @@ h1.page-title {
   margin: 12px 0;
 }
 
+/* ---------------- Account security alert ---------------- */
+.security-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 13px 16px;
+  border: 1px solid #E7BE6C;
+  border-radius: var(--radius);
+  background: var(--amber-soft);
+  color: var(--ink);
+  text-decoration: none;
+}
+.security-alert:hover { background: #FFF1CE; }
+.security-alert-icon { color: var(--amber); font-size: 20px; }
+.security-alert strong { display: block; font-size: 14px; }
+.security-alert-copy { display: block; margin-top: 2px; color: var(--ink-soft); font-size: 13px; }
+.security-alert-action { margin-left: auto; color: var(--amber); font-size: 13px; font-weight: 600; white-space: nowrap; }
+@media (max-width: 520px) {
+  .security-alert { align-items: flex-start; }
+  .security-alert-action { display: none; }
+}
+
 /* ---------------- Transaction rows ---------------- */
 .tx-list { border-top: 1px solid var(--rule); }
 .tx-row {
